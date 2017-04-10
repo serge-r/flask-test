@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content  %}
+	<h1>Certificate </h1>
+	<table style="width:100%" border='1'>
+	<tr>
+		<th>Cert CN</th>
+		<th>Cert status</th>
+		<th>Cert expire</th>
+		<th>Cert serial</th>
+		<th>Cert revoke date</th>
+	</tr>
+	{% for cert in certs %}
+	<tr>
+		<td>{{ cert.subject.CN }}</td>
+		<td>{{ cert.status }}</td>
+		<td>{{ cert.expire }}</td>
+		<td>{{ cert.serial }}</td>
+		<td>{{ cert.revokeDate }}</td>
+	</tr>
+	{% endfor %}
+	</table>
+{% endblock %}
