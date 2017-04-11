@@ -7,4 +7,8 @@ ca = opnssl.CA(CAPath="/home/serge/test-app/testCA/easyrsa3/pki/",
 
 print(ca.certs)
 
-ca.revokeCert("client1")
+result = ca.revokeCert("client1")
+
+#print(result[0])
+
+#print(result[1].decode())

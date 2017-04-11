@@ -19,7 +19,7 @@ class CA:
 		indexFile = CAPath + "/index.txt"
 		# Add a check filePath to correct CA
 		self.certs = self._parseIndex(indexFile)
-		self.exePath = treePath
+		self.exePath = treePath + '/easyrsa'
 			
 	def _parseIndex(self,filePath):
 		''' 
