@@ -12,15 +12,36 @@ class CA:
 	'''
 	def __init__(self,CAPath='./pki',treePath='./easyrsa3'):
 		'''
-		Init CA
-		Get a certs from index.txt
+		Constructor.
+		Init base values
+
+		CAPath - Path to CA root
+		treePath  - Path to easyRSA3 root
 		'''
-		os.chdir(treePath)
-		indexFile = CAPath + "/index.txt"
-		# Add a check filePath to correct CA
-		self.certs = self._parseIndex(indexFile)
-		self.exePath = treePath + '/easyrsa'
-			
+		self.CAPath=CAPath
+		self.treePath=treePath
+		self.certs =[]
+
+	def CAInit(self):
+		'''
+		Init CA
+		tryes to open
+		Get a certs from index.txt
+		Return status and error code
+		'''
+		try:
+			os.chdir(self.treePath)
+			indexFile = self.CAPath + "/index.txt"
+			# Add a check filePath to correct CA
+			self.certs = self._parseIndex(indexFile)
+			self.exePath = treePath + '/easyrsa'
+
+		except Exception as error:
+			return (1,error)
+
+		else:
+			return(0)
+
 	def _parseIndex(self,filePath):
 		''' 
 		Read index.txt file from CA database,
@@ -28,19 +49,18 @@ class CA:
 		returns a list of certificates
 			TODO: add a exception to test a files exists
 		'''
-		certs = []
 		with open(filePath, "r") as indexFile:
 			lines = indexFile.readlines()
 			for line in lines:
 				res = line.split('\t')
 				print (len(res))
 				if (len(res) > 2):
-					certs.append({'status': 	res[0],
-								  'expire': 	res[1],
-								  'revokeDate': res[2],
-								  'serial': 	res[3],
-								  'fileName':	res[4],
-								  'subject':	self._parseSubject(res[5])})
+					self.certs.append({'status': 		res[0],
+									   'expire': 		res[1],
+									   'revokeDate': 	res[2],
+									   'serial': 		res[3],
+									   'fileName': 		res[4],
+									   'subject': 		self._parseSubject(res[5])})
 		return certs
 
 	def _parseSubject(self,subjectLine):
