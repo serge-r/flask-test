@@ -3,6 +3,7 @@
 import os,sys
 import subprocess
 import random
+from pathlib import Path
 
 PASS_LEN=12
 
@@ -21,26 +22,35 @@ class CA:
 		self.CAPath=CAPath
 		self.treePath=treePath
 		self.certs =[]
+		self.filePath = CAPath + "/index.txt"
+		self.exePath = treePath + "/easyrsa"
 
 	def CAInit(self):
 		'''
 		Init CA
-		tryes to open
+		Rries to open CA major files
 		Get a certs from index.txt
-		Return status and error code
+		Return cort with status and error string
 		'''
 		try:
+			''' Catch if file not found '''
+			myfiles = (self.filePath, self.exePath)
+
+			for file in myfiles:
+				filePath = Path(file)
+				if not filePath.is_file():
+					return(1, "Not exists CA file: " + file)
+
 			os.chdir(self.treePath)
-			indexFile = self.CAPath + "/index.txt"
-			# Add a check filePath to correct CA
-			self.certs = self._parseIndex(indexFile)
-			self.exePath = treePath + '/easyrsa'
+			''' Add a check filePath to correct CA '''
+			self.certs = self._parseIndex(self.filePath)
 
 		except Exception as error:
+			''' Catch something else '''
 			return (1,error)
 
 		else:
-			return(0)
+			return(0,'NoError')
 
 	def _parseIndex(self,filePath):
 		''' 
@@ -53,7 +63,7 @@ class CA:
 			lines = indexFile.readlines()
 			for line in lines:
 				res = line.split('\t')
-				print (len(res))
+				# print (len(res))
 				if (len(res) > 2):
 					self.certs.append({'status': 		res[0],
 									   'expire': 		res[1],
@@ -61,7 +71,7 @@ class CA:
 									   'serial': 		res[3],
 									   'fileName': 		res[4],
 									   'subject': 		self._parseSubject(res[5])})
-		return certs
+		return self.certs
 
 	def _parseSubject(self,subjectLine):
 		'''
@@ -78,30 +88,39 @@ class CA:
 		return subject
 
 	def _randomPass(len=PASS_LEN):
-		""" Creates and return random string 
+		'''
+		Creates and return random string
 		Liters == letters
-		"""
+		'''
 		digits = "0123456789"
 		liters = "abcdefghijklmnopqrstuvwxyz+--()"
 		upLiters = liters.upper()
 
 		literList = list(liters + digits + upLiters)
 		random.shuffle(literList)
-		password = "".join(random.choice(literList) for x in xrange(len))
+		password = "".join(random.choice(literList) for x in range(len))
 
 		return password
 
-	def createCert(self,certCN,needPass=True):
+	def getCerts(self):
+		'''
+		Return a certs dirct
+		TODO: how do it better
+		'''
+		return self.certs
+
+	def createCert(self,certCN,needPass=False):
 		'''
 		TODO: add a check
 		'''
 		if (not needPass):
-			cmd = [self.exePath,'build-full-client',certCN,'nopass']
+			cmd = [self.exePath,'build-client-full',certCN,'nopass']
 			p = subprocess.Popen(cmd,stdout=subprocess.STDOUT,stdin=subprocess.PIPE,stderr=subprocess.STDOUT)
 			grep_stdout = p.communicate()[0]
 
 		else:
 			cmd = [self.exePath,'build-full-client',certCN]
+			print(cmd)
 			password = self._randomPass()
 			sentString = password + '\n' + password + '\n'
 			p = subprocess.Popen(cmd,stdout=subprocess.STDOUT,stdin=subprocess.PIPE,stderr=subprocess.STDOUT)

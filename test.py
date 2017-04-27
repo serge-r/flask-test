@@ -2,13 +2,21 @@
 
 import opnssl
 
-ca = opnssl.CA(CAPath="/home/serge/test-app/testCA/easyrsa3/pki/",
-			   treePath="/home/serge/test-app/testCA/easyrsa3")
+ca = opnssl.CA(CAPath="/home/serge/repos/easy-rsa/easyrsa3/pki",
+	    treePath="/home/serge/repos/easy-rsa/easyrsa3")
 
-print(ca.certs)
+res = ca.CAInit()
+print ("Satus {} errors: {}". format(res[0], res[1]))
 
-result = ca.revokeCert("client1")
+print ("Certificates:")
+for cert in ca.getCerts() :
+	for key,value in cert.items() :
+		print (key, value)
+	print ("\n")
 
-#print(result[0])
+result = ca.createCert("client2",needPass=False)
+
+
+print(result[0])
 
 #print(result[1].decode())
